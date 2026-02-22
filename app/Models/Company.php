@@ -58,4 +58,9 @@ class Company extends Model
     {
         return $this->hasMany(NarrationRule::class);
     }
+    /** A company has many invoices (via clients or directly) */
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
 }
