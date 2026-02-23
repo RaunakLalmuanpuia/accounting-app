@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\Banking\SmsIngestController;
 use App\Http\Controllers\Api\Banking\BankTransactionController;
 use App\Http\Controllers\Api\Banking\NarrationReviewController;
 use App\Http\Controllers\Api\Banking\StatementUploadController;
+use App\Http\Controllers\Api\NarrationHeadController;
+
 
 
 Route::get('/user', function (Request $request) {
@@ -48,4 +50,10 @@ Route::prefix('banking')->middleware(['api'])->group(function () {
 
         return response()->json($transactions);
     });
+});
+
+Route::prefix('narration-heads')->group(function () {
+    Route::post('/',                  [NarrationHeadController::class, 'index']);
+    Route::post('/{id}/sub-heads',    [NarrationHeadController::class, 'subHeads']);
+    Route::get('/{id}',               [NarrationHeadController::class, 'show']);
 });
