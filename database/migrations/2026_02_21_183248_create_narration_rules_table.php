@@ -29,6 +29,9 @@ return new class extends Migration
             $table->string('note_template')->nullable();
             $table->integer('priority')->default(10);
             $table->boolean('is_active')->default(true);
+            $table->enum('source', ['manual', 'learned'])->default('manual');
+            $table->unsignedInteger('match_count')->default(0);
+            $table->timestamp('last_matched_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
 

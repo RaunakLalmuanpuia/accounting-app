@@ -15,7 +15,7 @@ class NarrationRule extends Model
     protected $fillable = [
         'company_id', 'match_type', 'match_value', 'transaction_type',
         'amount_min', 'amount_max', 'narration_head_id',
-        'narration_sub_head_id', 'note_template', 'priority', 'is_active'
+        'narration_sub_head_id', 'note_template', 'priority', 'is_active','source','match_count','last_matched_at'
     ];
 
     protected $casts = [

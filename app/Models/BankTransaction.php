@@ -35,6 +35,7 @@ class BankTransaction extends Model
         'balance_after'    => 'decimal:2',
         'ai_confidence'    => 'decimal:2',
         'ai_suggestions'   => 'array',
+        'ai_metadata'      => 'array',
         'is_reconciled'    => 'boolean',
         'is_duplicate'     => 'boolean',
     ];
