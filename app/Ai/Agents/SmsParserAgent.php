@@ -30,7 +30,7 @@ class SmsParserAgent implements Agent, HasStructuredOutput
         - bank_reference: UTR/Ref/Txn number if present, else empty string
         - balance_after: balance figure if mentioned, else 0
         - party_name: merchant or counterparty name if clearly identifiable, else null
-        - raw_narration: a clean one-line summary of the transaction purpose
+        - raw_narration: the sms received itself
         Be precise; never guess amounts or dates.
         INSTRUCTIONS;
     }

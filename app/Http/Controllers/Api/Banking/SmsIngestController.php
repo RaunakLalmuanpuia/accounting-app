@@ -22,7 +22,7 @@ class SmsIngestController extends Controller
 
         return response()->json([
             'message'     => 'SMS ingested successfully.',
-//            'transaction' => $transaction,
+            'transaction' => $transaction,
         ], 201);
     }
 }

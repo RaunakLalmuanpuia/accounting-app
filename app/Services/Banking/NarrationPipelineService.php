@@ -23,7 +23,8 @@ class NarrationPipelineService
         $response = SmsParserAgent::make()->prompt("Parse this bank SMS:\n\n{$rawSms}");
 
         $dto = ParsedTransactionDTO::fromArray([
-            'raw_narration'    => $response['raw_narration'] ?? $rawSms,
+//            'raw_narration'    => $response['raw_narration'] ?? $rawSms,
+            'raw_narration'    => $rawSms, // Store the raw sms
             'type'             => $response['type'],
             'amount'           => $response['amount'],
             'bank_reference'   => $response['bank_reference'] ?? '',
