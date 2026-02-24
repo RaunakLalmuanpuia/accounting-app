@@ -31,8 +31,8 @@ export default function AuthenticatedLayout({ header, children }) {
                                     Docs
                                 </NavLink>
                                 <NavLink
-                                    href={route('dashboard')}
-                                    active={route().current('dashboard')}
+                                    href={route('accounting.chat')}
+                                    active={route().current('accounting.chat')}
                                 >
                                     Chat
                                 </NavLink>

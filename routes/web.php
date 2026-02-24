@@ -9,6 +9,8 @@ use App\Http\Controllers\Banking\NarrationReviewController;
 use App\Http\Controllers\Banking\SmsIngestController;
 use App\Http\Controllers\Banking\StatementUploadController;
 
+use App\Http\Controllers\AiChatController;
+
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
@@ -46,5 +48,17 @@ Route::middleware(['auth', 'verified'])->prefix('banking')->group(function () {
     // Statement Upload
     Route::post('/transactions/statement', StatementUploadController::class)
         ->name('banking.transactions.statement.upload');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+
+    // Render the chat UI
+    Route::get('/accounting/chat', [AiChatController::class, 'index'])
+        ->name('accounting.chat');
+
+    // Handle each message (Inertia router.post)
+    Route::post('/accounting/chat', [AiChatController::class, 'send'])
+        ->name('accounting.chat.send');
+
 });
 require __DIR__.'/auth.php';
