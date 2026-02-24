@@ -27,7 +27,10 @@ class NarrationSuggestionAgent implements Agent, HasStructuredOutput
         Your job:
         1. Pick the most appropriate head and sub-head from the catalog. Do NOT invent new ones.
         2. Write a concise narration_note (max 120 characters).
-        3. Identify the party name if not already provided.
+        3. Identify or deduce the `party_name`:
+           - Extract the actual person or business name for vendor payments, UPI, NEFT, IMPS, RTGS, etc.
+           - If the transaction is an internal bank deduction or credit (e.g., "Sms Charges", "Int.Pd", "Consolidated Charges", "Cheque Book Issue"), explicitly set the party name to "Bank".
+           - Strip out unnecessary identifiers, UTR numbers, or dates from the deduced name.
         4. Rate your confidence from 0.0 to 1.0. Only give 0.9+ when you are very sure.
         5. Briefly explain your reasoning.
         INSTRUCTIONS;

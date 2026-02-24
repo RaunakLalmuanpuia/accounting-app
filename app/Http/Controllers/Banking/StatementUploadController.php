@@ -21,6 +21,7 @@ class StatementUploadController extends Controller
         set_time_limit(300);
         ini_set('max_execution_time', 300);
 
+//        dd($request);
         $account = BankAccount::findOrFail($request->bank_account_id);
 
         // TODO: authorize($account->company_id === auth()->user()->company_id)

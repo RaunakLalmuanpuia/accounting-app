@@ -106,7 +106,7 @@ export default function PendingReviews({ auth, transactions, heads, bankAccounts
 
                             <input
                                 type="file"
-                                accept=".pdf,.csv,.xls,.xlsx"
+                                accept=".pdf,.csv,.xls,.xlsx,.png,.jpg,.jpeg"
                                 onChange={(e) => statementForm.setData('statement', e.target.files[0])}
                                 className="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg px-3 py-1.5 text-sm file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                             />

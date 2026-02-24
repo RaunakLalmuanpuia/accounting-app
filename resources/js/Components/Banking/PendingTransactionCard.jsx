@@ -142,6 +142,7 @@ export default function PendingTransactionCard({ transaction, heads = [] }) {
                                                     Suggested: {init.head.name} {init.subHead ? `→ ${init.subHead.name}` : ''}
                                                 </span>
                                             )}
+                                            <p>Narration: {transaction.narration_note}</p><br/>
                                             <p>{transaction.reasoning || 'AI mapped this based on similar patterns.'}</p>
                                         </div>
                                     </div>
