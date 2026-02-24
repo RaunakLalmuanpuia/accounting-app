@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Banking;
 
 use App\Actions\Banking\ProcessStatementAction;
+use App\Constants\ApiResponseType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Banking\StatementUploadRequest;
 use App\Models\BankAccount;
@@ -30,6 +31,7 @@ class StatementUploadController extends Controller
         $statusCode = $result['imported'] > 0 ? 201 : 200;
 
         return response()->json([
+            'status'=>ApiResponseType::SUCCESS,
             'message'    => $this->buildMessage($result),
             'batch_id'   => $result['batch_id'],
             'summary'    => [

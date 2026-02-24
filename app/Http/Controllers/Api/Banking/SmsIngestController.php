@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Banking;
 
 use App\Actions\Banking\IngestSmsTransactionAction;
+use App\Constants\ApiResponseType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Banking\SmsIngestRequest;
 use App\Models\BankAccount;
@@ -21,6 +22,7 @@ class SmsIngestController extends Controller
         $transaction = $this->action->execute($request->raw_sms, $account);
 
         return response()->json([
+            'status'=>ApiResponseType::SUCCESS,
             'message'     => 'SMS ingested successfully.',
             'transaction' => $transaction,
         ], 201);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Banking;
 
 use App\Actions\Banking\ReviewNarrationAction;
+use App\Constants\ApiResponseType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Banking\NarrationReviewRequest;
 use App\Models\BankTransaction;
@@ -34,6 +35,7 @@ class NarrationReviewController extends Controller
         };
 
         return response()->json([
+            'status'=>ApiResponseType::SUCCESS,
             'message'     => "Transaction {$action}d successfully.",
             'transaction' => $result,
         ]);
