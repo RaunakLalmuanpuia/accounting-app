@@ -2,7 +2,7 @@
 
 namespace App\Services\Banking;
 
-use App\Ai\Agents\StatementPdfParserAgent;
+use App\Ai\Agents\StatementDocumentParserAgent;
 use App\DTOs\Banking\ParsedTransactionDTO;
 use App\Services\Banking\CsvExcelStatementParser;
 use Illuminate\Http\UploadedFile;
@@ -25,7 +25,7 @@ class StatementParserService
     public function parse(UploadedFile $file): Collection
     {
         return match (strtolower($file->getClientOriginalExtension())) {
-            'pdf'         => $this->parsePdf($file),
+            'pdf', 'jpg', 'jpeg', 'png', 'webp' => $this->parseVisualDocument($file),
             'csv', 'xlsx', 'xls', 'xlsm', 'tsv'
             => $this->parseTabularFile($file),
 
@@ -35,18 +35,18 @@ class StatementParserService
         };
     }
 
-    // ── PDF ────────────────────────────────────────────────────────────────
+    // ── Visual Documents (PDF & Images) ────────────────────────────────────
 
     /**
-     * Pass the PDF directly to GPT-4o as an attachment.
-     * GPT-4o reads the PDF visually and extracts all rows.
+     * Pass the document directly to GPT-4o as an attachment.
+     * GPT-4o reads the file visually and extracts all rows.
      *
      * @return Collection<ParsedTransactionDTO>
      */
-    private function parsePdf(UploadedFile $file): Collection
+    private function parseVisualDocument(UploadedFile $file): Collection
     {
-        $response = StatementPdfParserAgent::make()->prompt(
-            'Extract all transaction rows from this bank statement PDF.',
+        $response = StatementDocumentParserAgent::make()->prompt(
+            'Extract all transaction rows from this attached bank statement.',
             attachments: [$file],
         );
 
@@ -60,7 +60,7 @@ class StatementParserService
 
         if (empty($rows)) {
             throw ValidationException::withMessages([
-                'statement' => 'No transactions could be extracted from the PDF. Please check the file.',
+                'statement' => 'No transactions could be extracted from the document. Please check the file.',
             ]);
         }
 

@@ -13,14 +13,14 @@ use Stringable;
 #[Provider(Lab::OpenAI)]
 #[Model('gpt-4o')]
 #[Temperature(0.0)]
-class StatementPdfParserAgent implements Agent
+class StatementDocumentParserAgent implements Agent
 {
     use Promptable;
 
     public function instructions(): Stringable|string
     {
         return <<<INSTRUCTIONS
-        You are a bank statement parser. The user will attach a bank statement PDF.
+        You are a bank statement parser. The user will attach a bank statement PDF or an image of a bank statement.
         Extract every individual transaction row from it.
 
         Rules:
