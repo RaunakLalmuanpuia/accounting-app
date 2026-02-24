@@ -15,6 +15,7 @@ class BankTransactionController extends Controller
     public function index(Request $request): JsonResponse
     {
         $transactions = BankTransaction::with(['narrationHead', 'narrationSubHead'])
+            ->where('is_duplicate', false)
             ->when($request->bank_account_id, fn($q, $v) => $q->where('bank_account_id', $v))
             ->when($request->review_status,   fn($q, $v) => $q->where('review_status', $v))
             ->when($request->type,             fn($q, $v) => $q->where('type', $v))
@@ -40,6 +41,7 @@ class BankTransactionController extends Controller
     {
 //        dd($request);
         $transactions = BankTransaction::with(['narrationHead', 'narrationSubHead'])
+            ->where('is_duplicate', false)
             ->where('review_status', 'pending')
             ->when($request->bank_account_id, fn($q, $v) => $q->where('bank_account_id', $v))
             ->orderByDesc('transaction_date')
