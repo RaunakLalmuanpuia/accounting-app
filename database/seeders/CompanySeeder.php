@@ -37,7 +37,7 @@ class CompanySeeder extends Seeder
 
         $this->command?->info("▶ Seeding Retail: {$companyA->company_name}");
         (new NarrationHeadSeeder())->run($companyA); // Uses defaults
-        (new NarrationRuleSeeder())->run($companyA); // Uses defaults
+//        (new NarrationRuleSeeder())->run($companyA); // Uses defaults
 
         // ── Company B: Horizon Tech (SaaS) ──
         $userB = User::firstOrCreate(
@@ -67,7 +67,7 @@ class CompanySeeder extends Seeder
 
         $this->command?->info("▶ Seeding SaaS: {$companyB->company_name}");
         (new NarrationHeadSeeder())->run($companyB, $this->horizonTechHeads());
-        (new NarrationRuleSeeder())->run($companyB, $this->horizonTechRules());
+//        (new NarrationRuleSeeder())->run($companyB, $this->horizonTechRules());
     }
 
     private function horizonTechHeads(): array

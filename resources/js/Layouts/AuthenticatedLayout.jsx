@@ -37,8 +37,8 @@ export default function AuthenticatedLayout({ header, children }) {
                                     Chat
                                 </NavLink>
                                 <NavLink
-                                    href={route('dashboard')}
-                                    active={route().current('dashboard')}
+                                    href={route('banking.transactions.pending')}
+                                    active={route().current('banking.transactions.pending')}
                                 >
                                     Narration
                                 </NavLink>

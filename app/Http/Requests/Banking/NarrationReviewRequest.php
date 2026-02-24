@@ -10,7 +10,8 @@ class NarrationReviewRequest extends FormRequest
     {
         return match ($this->route('action')) {
             'correct' => [
-                'narration_sub_head_id' => ['required', 'integer', 'exists:narration_sub_heads,id'],
+                'narration_head_id'     => ['required', 'integer', 'exists:narration_heads,id'], // Compulsory
+                'narration_sub_head_id' => ['nullable', 'integer', 'exists:narration_sub_heads,id'],
                 'narration_note'        => ['nullable', 'string', 'max:255'],
                 'party_name'            => ['nullable', 'string', 'max:100'],
                 'save_as_rule'          => ['boolean'],

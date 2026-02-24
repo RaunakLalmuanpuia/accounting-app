@@ -3,6 +3,7 @@
 namespace App\Actions\Banking;
 
 use App\Models\BankTransaction;
+use App\Models\NarrationHead;
 use App\Models\NarrationRule;
 use App\Models\NarrationSubHead;
 use Illuminate\Support\Facades\DB;
@@ -17,18 +18,20 @@ class ReviewNarrationAction
 
     public function correct(
         BankTransaction $transaction,
+        int $narrationHeadId,
         int    $narrationSubHeadId,
         ?string $narrationNote = null,
         ?string $partyName     = null,
         bool   $saveAsRule     = false,
     ): BankTransaction {
         return DB::transaction(function () use (
-            $transaction, $narrationSubHeadId, $narrationNote, $partyName, $saveAsRule
+            $transaction, $narrationHeadId,$narrationSubHeadId, $narrationNote, $partyName, $saveAsRule
         ) {
+            $head = NarrationHead::find($narrationHeadId);
             $subHead = NarrationSubHead::findOrFail($narrationSubHeadId);
 
             $transaction->update([
-                'narration_head_id'     => $subHead->narration_head_id,
+                'narration_head_id'     => $head->id,
                 'narration_sub_head_id' => $subHead->id,
                 'narration_note'        => $narrationNote,
                 'party_name'            => $partyName ?? $transaction->party_name,
@@ -37,7 +40,7 @@ class ReviewNarrationAction
             ]);
 
             if ($saveAsRule && strlen($transaction->raw_narration) >= 4) {
-                $this->createLearningRule($transaction, $subHead->narration_head_id, $subHead->id);
+                $this->createLearningRule($transaction, $subHead->narration_head_id, $subHead->id,$narrationNote);
             }
 
             return $transaction->fresh(['narrationHead', 'narrationSubHead']);
@@ -55,9 +58,9 @@ class ReviewNarrationAction
         return $transaction->fresh();
     }
 
-    private function createLearningRule(BankTransaction $transaction, int $headId, int $subHeadId): NarrationRule
+    private function createLearningRule(BankTransaction $transaction, int $headId, int $subHeadId, string $narrationNote): NarrationRule
     {
-        $matchValue = strtolower(substr($transaction->raw_narration, 0, 30));
+        $matchValue = strtolower(trim(substr($transaction->raw_narration ?? '', 0, 30)));
 
         return NarrationRule::updateOrCreate(
             [
@@ -69,6 +72,7 @@ class ReviewNarrationAction
                 'transaction_type'      => $transaction->type,
                 'narration_head_id'     => $headId,
                 'narration_sub_head_id' => $subHeadId,
+                'note_template'        => $narrationNote,
                 'priority'              => 10,
                 'is_active'             => true,
                 'source'                => 'learned',

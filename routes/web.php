@@ -4,6 +4,10 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\Banking\BankTransactionController;
+use App\Http\Controllers\Banking\NarrationReviewController;
+use App\Http\Controllers\Banking\SmsIngestController;
+use App\Http\Controllers\Banking\StatementUploadController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -24,4 +28,23 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::middleware(['auth', 'verified'])->prefix('banking')->group(function () {
+
+    // Display pending transactions view
+    Route::get('/transactions/pending', [BankTransactionController::class, 'pending'])
+        ->name('banking.transactions.pending');
+
+    // Handle narration review (Inertia will submit to this)
+    Route::post('/transactions/{transaction}/review/{action}', [NarrationReviewController::class, 'handle'])
+        ->where('action', 'approve|correct|reject')
+        ->name('banking.transactions.review');
+
+    // SMS Ingest
+    Route::post('/transactions/sms', SmsIngestController::class)
+        ->name('banking.transactions.sms.ingest');
+
+    // Statement Upload
+    Route::post('/transactions/statement', StatementUploadController::class)
+        ->name('banking.transactions.statement.upload');
+});
 require __DIR__.'/auth.php';
