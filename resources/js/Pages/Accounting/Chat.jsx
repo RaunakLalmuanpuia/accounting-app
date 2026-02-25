@@ -3,7 +3,7 @@ import { Head, usePage, useForm } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import {
     Send, Sparkles, Paperclip, X, AlertCircle, Loader2, Copy, Check,
-    FileText, BarChart3, Users, Receipt, ShieldCheck, Zap,Package
+    FileText, BarChart3, Users, Receipt, ShieldCheck, Zap,Package,Building
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -120,6 +120,7 @@ export default function Chat() {
     const botFeatures = [
         // { icon: <FileText size={18} />, title: "Fetch & Generate Invoices", desc: "Instantly retrieve or draft new invoices." },
         // { icon: <BarChart3 size={18} />, title: "Financial Reports", desc: "Get quick summaries of your income & expenses." },
+        { icon: <Building size={18} />, title: "Business Details", desc: "View your company profile, update business information, and manage settings." },
         { icon: <Users size={18} />, title: "Client Management", desc: "Look up client details, create new clients, update clients and delete clients." },
         { icon: <Package size={18} />, title: "Inventory Management", desc: "Look up inventory items, add new products, update stock levels, and delete items." },
         // { icon: <Receipt size={18} />, title: "Expense Tracking", desc: "Upload receipts to log and categorize expenses." },

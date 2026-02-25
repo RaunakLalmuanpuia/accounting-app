@@ -2,6 +2,8 @@
 
 namespace App\Ai\Agents;
 
+use App\Ai\Tools\Company\GetCompany;
+use App\Ai\Tools\Company\UpdateCompany;
 use App\Ai\Tools\Client\CreateClient;
 use App\Ai\Tools\Client\GetClientDetails;
 use App\Ai\Tools\Client\GetClients;
@@ -84,6 +86,11 @@ class AccountingAssistant implements Agent, Conversational, HasTools
     public function tools(): iterable
     {
         return [
+
+            // -- Company --------------------------------------------------
+            new GetCompany($this->user),
+            new UpdateCompany($this->user),
+
             // -- Clients --------------------------------------------------
             new GetClients($this->user),
             new GetClientDetails($this->user),
