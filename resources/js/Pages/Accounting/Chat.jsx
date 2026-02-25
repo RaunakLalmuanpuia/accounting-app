@@ -3,7 +3,7 @@ import { Head, usePage, useForm } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import {
     Send, Sparkles, Paperclip, X, AlertCircle, Loader2, Copy, Check,
-    FileText, BarChart3, Users, Receipt, ShieldCheck, Zap
+    FileText, BarChart3, Users, Receipt, ShieldCheck, Zap,Package
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -121,6 +121,7 @@ export default function Chat() {
         // { icon: <FileText size={18} />, title: "Fetch & Generate Invoices", desc: "Instantly retrieve or draft new invoices." },
         // { icon: <BarChart3 size={18} />, title: "Financial Reports", desc: "Get quick summaries of your income & expenses." },
         { icon: <Users size={18} />, title: "Client Management", desc: "Look up client details, create new clients, update clients and delete clients." },
+        { icon: <Package size={18} />, title: "Inventory Management", desc: "Look up inventory items, add new products, update stock levels, and delete items." },
         // { icon: <Receipt size={18} />, title: "Expense Tracking", desc: "Upload receipts to log and categorize expenses." },
         // { icon: <ShieldCheck size={18} />, title: "Tax Compliance Check", desc: "Ensure your records meet standard tax rules." },
         // { icon: <Zap size={18} />, title: "Data Extraction", desc: "Read and extract data from attached PDFs/Excel." },

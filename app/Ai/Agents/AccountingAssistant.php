@@ -7,6 +7,11 @@ use App\Ai\Tools\Client\GetClientDetails;
 use App\Ai\Tools\Client\GetClients;
 use App\Ai\Tools\Client\UpdateClient;
 use App\Ai\Tools\Client\DeleteClient;
+use App\Ai\Tools\Inventory\CreateInventoryItem;
+use App\Ai\Tools\Inventory\DeleteInventoryItem;
+use App\Ai\Tools\Inventory\GetInventory;
+use App\Ai\Tools\Inventory\UpdateInventoryItem;
+
 use App\Models\User;
 use Laravel\Ai\Attributes\MaxSteps;
 use Laravel\Ai\Attributes\MaxTokens;
@@ -54,9 +59,15 @@ class AccountingAssistant implements Agent, Conversational, HasTools
         - List clients, search by name/city, view detailed profiles with outstanding balances
         - Create, update, and delete clients (soft-delete; warns if unpaid invoices exist)
 
+         **Inventory / Products**
+        - Browse products and services, filter by category or low-stock status
+        - Create, update, and delete inventory items (soft-delete; historical invoice lines are preserved)
+        - Adjust stock quantities
+
+
 
         ## Behaviour Guidelines
-        - Always confirm destructive or financial actions (creating invoices, updating payments) before proceeding.
+        - Always confirm destructive or financial actions (creating invoices, updating payments ,etc) before proceeding.
         - When creating an invoice, first look up the client if not given an ID. Confirm the line items before creating.
         - For ambiguous requests (e.g. "show my invoices"), fetch the last 15 and summarise.
         - Present monetary values in Indian Rupees (₹) with two decimal places unless the client uses a different currency.
@@ -73,12 +84,19 @@ class AccountingAssistant implements Agent, Conversational, HasTools
     public function tools(): iterable
     {
         return [
-            // ── Clients ──────────────────────────────────────────────
+            // -- Clients --------------------------------------------------
             new GetClients($this->user),
             new GetClientDetails($this->user),
             new CreateClient($this->user),
             new UpdateClient($this->user),
             new DeleteClient($this->user),
+
+            // -- Inventory ------------------------------------------------
+            new GetInventory($this->user),
+            new CreateInventoryItem($this->user),
+            new UpdateInventoryItem($this->user),
+            new DeleteInventoryItem($this->user),
+
 
         ];
     }
