@@ -1,14 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Head, usePage, useForm } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'; // <-- Import Breeze Layout
-import { Send, Sparkles, Paperclip, X, AlertCircle, Loader2 } from 'lucide-react';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import {
+    Send, Sparkles, Paperclip, X, AlertCircle, Loader2, Copy, Check,
+    FileText, BarChart3, Users, Receipt, ShieldCheck, Zap
+} from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export default function Chat() {
-    // Access props shared from the HandleInertiaRequests middleware
     const { auth, errors } = usePage().props;
 
     const scrollRef = useRef(null);
     const fileInputRef = useRef(null);
+    const textareaRef = useRef(null);
 
     const [localMessages, setLocalMessages] = useState([
         {
@@ -18,13 +23,14 @@ export default function Chat() {
         }
     ]);
 
+    const [copiedId, setCopiedId] = useState(null);
+
     const { data, setData, post, processing, reset, clearErrors } = useForm({
         message: '',
         conversation_id: null,
         attachments: []
     });
 
-    // 1. Listen for new AI responses from flashed session data
     useEffect(() => {
         if (auth.chatResponse && auth.chatResponse.reply) {
             setLocalMessages(prev => [...prev, {
@@ -33,19 +39,16 @@ export default function Chat() {
                 content: auth.chatResponse.reply
             }]);
 
-            // Save the conversation ID for subsequent requests
             if (!data.conversation_id && auth.chatResponse.conversation_id) {
                 setData('conversation_id', auth.chatResponse.conversation_id);
             }
         }
     }, [auth.chatResponse]);
 
-    // 2. Auto-scroll to the bottom when messages update
     useEffect(() => {
         scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [localMessages, processing]);
 
-    // 3. Handle Form Submission
     const submit = (e) => {
         e?.preventDefault();
         if ((!data.message.trim() && data.attachments.length === 0) || processing) return;
@@ -53,7 +56,7 @@ export default function Chat() {
         setLocalMessages(prev => [...prev, {
             id: Date.now() + 1,
             role: 'user',
-            content: data.message,
+            content: data.message.trim(),
             attachmentCount: data.attachments.length
         }]);
 
@@ -64,11 +67,28 @@ export default function Chat() {
                 reset('message', 'attachments');
                 clearErrors();
                 if(fileInputRef.current) fileInputRef.current.value = '';
+                if (textareaRef.current) {
+                    textareaRef.current.style.height = 'auto';
+                }
             },
         });
     };
 
-    // 4. Handle File Attachments
+    const handleInput = (e) => {
+        setData('message', e.target.value);
+        if (textareaRef.current) {
+            textareaRef.current.style.height = 'auto';
+            textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
+        }
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            submit(e);
+        }
+    };
+
     const handleFileChange = (e) => {
         const files = Array.from(e.target.files);
         if (data.attachments.length + files.length > 5) {
@@ -84,10 +104,26 @@ export default function Chat() {
         setData('attachments', newAttachments);
     };
 
+    const handleCopy = (text, id) => {
+        navigator.clipboard.writeText(text);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
+    };
+
     const suggestedPrompts = [
         "Fetch me an invoice",
         "Issue an invoice",
         "Give me 6 month report"
+    ];
+
+    // Hard-coded list of functionalities for the right sidebar
+    const botFeatures = [
+        // { icon: <FileText size={18} />, title: "Fetch & Generate Invoices", desc: "Instantly retrieve or draft new invoices." },
+        // { icon: <BarChart3 size={18} />, title: "Financial Reports", desc: "Get quick summaries of your income & expenses." },
+        { icon: <Users size={18} />, title: "Client Management", desc: "Look up client details, create new clients, update clients and delete clients." },
+        // { icon: <Receipt size={18} />, title: "Expense Tracking", desc: "Upload receipts to log and categorize expenses." },
+        // { icon: <ShieldCheck size={18} />, title: "Tax Compliance Check", desc: "Ensure your records meet standard tax rules." },
+        // { icon: <Zap size={18} />, title: "Data Extraction", desc: "Read and extract data from attached PDFs/Excel." },
     ];
 
     return (
@@ -95,121 +131,167 @@ export default function Chat() {
             <Head title="Chat Assistant" />
 
             <div>
-                <div className="max-w-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-10">
-                    {/* Notice the h-[75vh] here.
-                        This gives the chat window a fixed height inside the Breeze layout
-                        so the overflow-y-auto on the message area works properly.
-                    */}
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-xl flex flex-col h-[75vh] border border-gray-100">
+                {/* Changed to max-w-6xl and added flex container for layout */}
+                <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
 
-                        {/* Header */}
-                        <header className="p-4 border-b border-gray-100 flex items-center justify-between bg-white z-10">
-                            <div className="flex items-center gap-3">
-                                <div className="relative">
-                                    <div className="w-10 h-10 bg-[#5d51e8] rounded-full flex items-center justify-center text-white font-bold text-sm tracking-wide">
-                                        AI
-                                    </div>
-                                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
-                                </div>
-                                <div>
-                                    <h1 className="font-bold text-gray-900 text-[15px]">Accounting Assistant</h1>
-                                    <div className="flex items-center gap-1">
-                                        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                                        <span className="text-xs text-gray-500 font-medium">Online</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </header>
+                    <div className="flex flex-col lg:flex-row gap-6 h-[80vh]">
 
-                        {/* Error Banner */}
-                        {errors.ai && (
-                            <div className="bg-red-50 p-3 flex items-center gap-2 text-red-700 text-sm border-b border-red-100">
-                                <AlertCircle size={16} />
-                                <span>{errors.ai}</span>
-                            </div>
-                        )}
-
-                        {/* Messages Area */}
-                        <main className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-gray-50/30">
-                            <div className="flex justify-center">
-                                <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded-full uppercase tracking-widest">
-                                    Today
-                                </span>
-                            </div>
-
-                            {localMessages.map((msg) => (
-                                <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`max-w-[85%] px-5 py-3.5 rounded-2xl text-[15px] leading-relaxed shadow-sm ${
-                                        msg.role === 'user'
-                                            ? 'bg-[#5d51e8] text-white rounded-tr-none'
-                                            : 'bg-white border border-gray-100 text-gray-800 rounded-tl-none'
-                                    }`}>
-                                        {msg.attachmentCount > 0 && (
-                                            <div className="flex items-center gap-1 text-xs opacity-75 mb-2 pb-2 border-b border-white/20">
-                                                <Paperclip size={12} /> {msg.attachmentCount} file(s) attached
-                                            </div>
-                                        )}
-                                        <div className="whitespace-pre-wrap">{msg.content}</div>
-                                    </div>
-                                </div>
-                            ))}
-
-                            {/* Typing Indicator */}
-                            {processing && (
-                                <div className="flex justify-start">
-                                    <div className="bg-gray-50 border border-gray-100 text-gray-500 px-5 py-3.5 rounded-2xl rounded-tl-none flex items-center gap-2 shadow-sm">
-                                        <Loader2 size={16} className="animate-spin text-[#5d51e8]" />
-                                        <span className="text-sm">Thinking...</span>
-                                    </div>
-                                </div>
-                            )}
-                            <div ref={scrollRef} />
-                        </main>
-
-                        {/* Footer / Input Area */}
-                        <footer className="p-4 bg-white border-t border-gray-100">
-                            {/* File Attachment Previews */}
-                            {data.attachments.length > 0 && (
-                                <div className="flex flex-wrap gap-2 mb-3">
-                                    {data.attachments.map((file, idx) => (
-                                        <div key={idx} className="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-indigo-100">
-                                            <span className="truncate max-w-[120px]">{file.name}</span>
-                                            <button type="button" onClick={() => removeAttachment(idx)} className="hover:text-red-500">
-                                                <X size={14} />
-                                            </button>
+                        {/* LEFT COLUMN: Chat Area */}
+                        <div className="flex-1 bg-white overflow-hidden shadow-sm sm:rounded-2xl flex flex-col h-full border border-gray-100">
+                            {/* Header */}
+                            <header className="p-4 border-b border-gray-100 flex items-center justify-between bg-white/80 backdrop-blur-md z-10 sticky top-0">
+                                <div className="flex items-center gap-3">
+                                    <div className="relative">
+                                        <div className="w-10 h-10 bg-gradient-to-br from-[#5d51e8] to-[#8e84f3] rounded-full flex items-center justify-center text-white font-bold text-sm tracking-wide shadow-sm">
+                                            AI
                                         </div>
-                                    ))}
+                                        <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+                                    </div>
+                                    <div>
+                                        <h1 className="font-bold text-gray-900 text-[15px]">Accounting Assistant</h1>
+                                        <div className="flex items-center gap-1">
+                                            <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                                            <span className="text-xs text-gray-500 font-medium">Online</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </header>
+
+                            {/* Error Banner */}
+                            {errors.ai && (
+                                <div className="bg-red-50 p-3 flex items-center gap-2 text-red-700 text-sm border-b border-red-100">
+                                    <AlertCircle size={16} />
+                                    <span>{errors.ai}</span>
                                 </div>
                             )}
 
-                            {/* Suggested Prompts */}
-                            {!data.attachments.length && (
-                                <div className="flex gap-2 overflow-x-auto no-scrollbar pb-3">
-                                    {suggestedPrompts.map((text) => (
-                                        <button
-                                            key={text}
-                                            onClick={() => setData('message', text)}
-                                            className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors whitespace-nowrap"
-                                        >
-                                            {text}
-                                        </button>
-                                    ))}
+                            {/* Messages Area */}
+                            <main className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-gray-50/50">
+                                <div className="flex justify-center">
+                                    <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded-full uppercase tracking-widest">
+                                        Today
+                                    </span>
                                 </div>
-                            )}
 
-                            {/* Input Form */}
-                            <form onSubmit={submit} className="relative group flex items-center gap-2">
-                                <div className="relative flex-1 flex items-center">
-                                    <div className="absolute left-4 text-[#5d51e8]/60">
+                                {localMessages.map((msg) => (
+                                    <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                        <div className={`relative max-w-[85%] px-5 py-3.5 rounded-2xl text-[15px] leading-relaxed shadow-sm group ${
+                                            msg.role === 'user'
+                                                ? 'bg-[#5d51e8] text-white rounded-br-sm'
+                                                : 'bg-white border border-gray-100 text-gray-800 rounded-bl-sm'
+                                        }`}>
+
+                                            {msg.role === 'assistant' && (
+                                                <button
+                                                    onClick={() => handleCopy(msg.content, msg.id)}
+                                                    className="absolute top-2 right-2 p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    title="Copy to clipboard"
+                                                >
+                                                    {copiedId === msg.id ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+                                                </button>
+                                            )}
+
+                                            {msg.attachmentCount > 0 && (
+                                                <div className="flex items-center gap-1 text-xs opacity-75 mb-2 pb-2 border-b border-white/20">
+                                                    <Paperclip size={12} /> {msg.attachmentCount} file(s) attached
+                                                </div>
+                                            )}
+
+                                            {msg.role === 'user' ? (
+                                                <div className="whitespace-pre-wrap break-words">{msg.content}</div>
+                                            ) : (
+                                                <div className="markdown-body pr-6 break-words">
+                                                    <ReactMarkdown
+                                                        remarkPlugins={[remarkGfm]}
+                                                        components={{
+                                                            p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />,
+                                                            ul: ({node, ...props}) => <ul className="list-disc ml-5 mb-2" {...props} />,
+                                                            ol: ({node, ...props}) => <ol className="list-decimal ml-5 mb-2" {...props} />,
+                                                            li: ({node, ...props}) => <li className="mb-1" {...props} />,
+                                                            table: ({node, ...props}) => (
+                                                                <div className="overflow-x-auto my-3">
+                                                                    <table className="min-w-full divide-y divide-gray-200 border border-gray-200 text-sm" {...props} />
+                                                                </div>
+                                                            ),
+                                                            th: ({node, ...props}) => <th className="bg-gray-50 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200" {...props} />,
+                                                            td: ({node, ...props}) => <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-700 border-b border-gray-200" {...props} />,
+                                                            strong: ({node, ...props}) => <strong className="font-semibold text-gray-900" {...props} />,
+                                                        }}
+                                                    >
+                                                        {msg.content}
+                                                    </ReactMarkdown>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+
+                                {processing && (
+                                    <div className="flex justify-start">
+                                        <div className="bg-white border border-gray-100 text-gray-500 px-5 py-3.5 rounded-2xl rounded-bl-sm flex items-center gap-2 shadow-sm">
+                                            <Loader2 size={16} className="animate-spin text-[#5d51e8]" />
+                                            <span className="text-sm">Thinking...</span>
+                                        </div>
+                                    </div>
+                                )}
+                                <div ref={scrollRef} />
+                            </main>
+
+                            {/* Footer / Input Area */}
+                            <footer className="p-4 bg-white border-t border-gray-100">
+
+                                {/* File Attachment Previews */}
+                                {data.attachments.length > 0 && (
+                                    <div className="flex flex-wrap gap-2 mb-3">
+                                        {data.attachments.map((file, idx) => (
+                                            <div key={idx} className="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-indigo-100">
+                                                <span className="truncate max-w-[120px]">{file.name}</span>
+                                                <button type="button" onClick={() => removeAttachment(idx)} className="hover:text-red-500">
+                                                    <X size={14} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Suggested Prompts */}
+                                {!data.attachments.length && localMessages.length <= 1 && (
+                                    <div className="flex gap-2 overflow-x-auto no-scrollbar pb-3">
+                                        {suggestedPrompts.map((text) => (
+                                            <button
+                                                key={text}
+                                                onClick={() => {
+                                                    setData('message', text);
+                                                    setTimeout(() => submit(), 50);
+                                                }}
+                                                className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors whitespace-nowrap"
+                                            >
+                                                {text}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Modern Input Form */}
+                                <form onSubmit={submit} className="relative flex items-end bg-gray-100 rounded-3xl border border-transparent focus-within:ring-2 focus-within:ring-[#5d51e8]/20 focus-within:bg-white focus-within:border-[#5d51e8]/30 transition-all shadow-sm">
+
+                                    <div className="absolute left-4 bottom-3.5 text-[#5d51e8]/60 pointer-events-none">
                                         <Sparkles size={20} />
                                     </div>
-                                    <input
-                                        type="text"
-                                        placeholder="Ask anything..."
+
+                                    <textarea
+                                        ref={textareaRef}
+                                        rows={1}
+                                        placeholder="Message Accounting Assistant..."
                                         value={data.message}
-                                        onChange={e => setData('message', e.target.value)}
+                                        onChange={handleInput}
+                                        onKeyDown={handleKeyDown}
                                         disabled={processing}
-                                        className={`w-full pl-12 pr-14 py-4 bg-gray-100 border-transparent rounded-2xl focus:ring-2 focus:ring-[#5d51e8]/20 focus:bg-white focus:border-[#5d51e8]/30 transition-all text-gray-800 placeholder-gray-400 ${errors.message ? 'border-red-300 ring-red-200 focus:ring-red-200' : ''}`}
+                                        className={`w-full pl-12 pr-24 py-3.5 bg-transparent border-none focus:ring-0 resize-none text-gray-800 placeholder-gray-500 m-0 ${errors.message ? 'border-red-300 ring-red-200 focus:ring-red-200' : ''}`}
+                                        style={{
+                                            minHeight: '52px',
+                                            maxHeight: '200px'
+                                        }}
                                     />
 
                                     <input
@@ -221,26 +303,68 @@ export default function Chat() {
                                         accept=".pdf,.csv,.xlsx,.xls,.docx,.doc,.txt,.png,.jpg,.jpeg,.webp"
                                     />
 
-                                    <button
-                                        type="button"
-                                        onClick={() => fileInputRef.current?.click()}
-                                        className="absolute right-14 p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                                        title="Attach files (Max 5)"
-                                    >
-                                        <Paperclip size={18} />
-                                    </button>
+                                    <div className="absolute right-2 bottom-2 flex items-center gap-1">
+                                        <button
+                                            type="button"
+                                            onClick={() => fileInputRef.current?.click()}
+                                            className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-xl transition-colors"
+                                            title="Attach files (Max 5)"
+                                        >
+                                            <Paperclip size={18} />
+                                        </button>
 
-                                    <button
-                                        disabled={processing || (!data.message.trim() && data.attachments.length === 0)}
-                                        className="absolute right-2 p-2.5 bg-[#8e84f3] text-white rounded-xl hover:bg-[#5d51e8] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        <Send size={18} />
-                                    </button>
+                                        <button
+                                            type="submit"
+                                            disabled={processing || (!data.message.trim() && data.attachments.length === 0)}
+                                            className="p-2 bg-[#5d51e8] text-white rounded-xl hover:bg-[#4a3fc4] transition-colors disabled:opacity-50 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
+                                        >
+                                            <Send size={18} className={data.message.trim() || data.attachments.length > 0 ? "translate-x-0.5" : ""} />
+                                        </button>
+                                    </div>
+                                </form>
+
+                                <div className="flex justify-between items-center px-2">
+                                    {errors.message ? (
+                                        <p className="text-red-500 text-xs mt-2">{errors.message}</p>
+                                    ) : (
+                                        <p className="text-gray-400 text-[10px] mt-2 text-center w-full">
+                                            AI can make mistakes. Check important info.
+                                        </p>
+                                    )}
                                 </div>
-                            </form>
-                            {errors.message && <p className="text-red-500 text-xs mt-2 ml-4">{errors.message}</p>}
-                            {errors['attachments.0'] && <p className="text-red-500 text-xs mt-2 ml-4">File upload error. Check file size/type.</p>}
-                        </footer>
+
+                            </footer>
+                        </div>
+
+                        {/* RIGHT COLUMN: Chat Functionalities Sidebar */}
+                        <aside className="w-full lg:w-[320px] flex-shrink-0 bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-gray-100 flex flex-col h-full">
+                            <div className="p-5 border-b border-gray-100 bg-gray-50/50">
+                                <h2 className="font-bold text-gray-900 flex items-center gap-2">
+                                    <Sparkles size={18} className="text-[#5d51e8]" />
+                                    What I can do
+                                </h2>
+
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-3 space-y-2">
+                                {botFeatures.map((feature, idx) => (
+                                    <div
+                                        key={idx}
+                                        className="flex gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100 cursor-default"
+                                    >
+                                        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                            {feature.icon}
+                                        </div>
+                                        <div>
+                                            <h3 className="text-sm font-semibold text-gray-800">{feature.title}</h3>
+                                            <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{feature.desc}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                        </aside>
+
                     </div>
                 </div>
             </div>
