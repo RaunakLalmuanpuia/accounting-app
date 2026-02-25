@@ -68,6 +68,8 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->text('terms_and_conditions')->nullable();
 
+            $table->string('pdf_path')->nullable();
+
             // Self-reference for credit/debit notes
             $table->foreignId('reference_invoice_id')->nullable()->constrained('invoices')->nullOnDelete();
 

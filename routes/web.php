@@ -8,6 +8,10 @@ use App\Http\Controllers\Banking\BankTransactionController;
 use App\Http\Controllers\Banking\NarrationReviewController;
 use App\Http\Controllers\Banking\SmsIngestController;
 use App\Http\Controllers\Banking\StatementUploadController;
+use App\Http\Controllers\InvoiceDownloadController;
+
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
 
 use App\Http\Controllers\AiChatController;
 
@@ -61,4 +65,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('accounting.chat.send');
 
 });
+
+
+
+Route::get('/download-invoice', [InvoiceDownloadController::class, 'download'])
+    ->name('invoices.download')
+    ->middleware('auth');
 require __DIR__.'/auth.php';

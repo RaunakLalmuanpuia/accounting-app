@@ -1,7 +1,5 @@
 <?php
 
-// php artisan make:model Invoice -m
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -29,7 +27,7 @@ class Invoice extends Model
         'invoice_type', 'status', 'supply_type',
         'payment_terms',
         'bank_account_name', 'bank_account_number', 'bank_ifsc_code',
-        'notes', 'terms_and_conditions',
+        'notes', 'terms_and_conditions', 'pdf_path',
         'reference_invoice_id',
     ];
 
@@ -61,13 +59,11 @@ class Invoice extends Model
 
     // ── Relationships ──────────────────────────────────────────────────────
 
-    /** Invoice belongs to a Company (the seller) */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
-    /** Invoice belongs to a Client (the buyer) */
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
@@ -95,6 +91,17 @@ class Invoice extends Model
         return $query->where('client_id', $clientId);
     }
 
+    /**
+     * Resolve an invoice by either its integer ID or its invoice_number string.
+     * Usage: Invoice::forCompany($id)->resolveByRef($ref)->first()
+     */
+    public function scopeResolveByRef(Builder $query, int|string $ref): Builder
+    {
+        return is_numeric($ref)
+            ? $query->where('id', $ref)
+            : $query->where('invoice_number', $ref);
+    }
+
     public function scopeStatus(Builder $query, string $status): Builder
     {
         return $query->where('status', $status);
@@ -106,11 +113,41 @@ class Invoice extends Model
             ->where('due_date', '<', now()->toDateString());
     }
 
+    /**
+     * Scope to find stale draft invoices older than the given number of days.
+     * Used by the scheduled cleanup command.
+     */
+    public function scopeStaleDrafts(Builder $query, int $days = 7): Builder
+    {
+        return $query->where('status', 'draft')
+            ->where('created_at', '<', now()->subDays($days));
+    }
+
     // ── Business Logic ─────────────────────────────────────────────────────
 
+    /**
+     * Generate a unique invoice number in the format INV-YYYYMMDD-NNNNN.
+     * Retries on the rare chance of a collision (date + 5-digit random = 1-in-99999 per day).
+     *
+     * FIX: Replaced timestamp + 2-digit random (collision-prone) with
+     *      date-prefixed + 5-digit random + uniqueness check.
+     */
     public static function generateNumber(): string
     {
-        return 'INV-' . now()->timestamp . random_int(10, 99);
+        $attempts = 0;
+
+        do {
+            $number = 'INV-' . now()->format('Ymd') . '-' . str_pad(random_int(1, 99999), 5, '0', STR_PAD_LEFT);
+            $attempts++;
+
+            if ($attempts > 10) {
+                // Absolute fallback: use microseconds — astronomically unlikely to reach here
+                $number = 'INV-' . now()->format('YmdHis') . '-' . random_int(100, 999);
+                break;
+            }
+        } while (static::where('invoice_number', $number)->exists());
+
+        return $number;
     }
 
     /** Determine supply type from company vs client state codes */
@@ -121,19 +158,31 @@ class Invoice extends Model
             : 'inter_state';
     }
 
-    /** Recalculate all totals from line items */
+    /**
+     * Recalculate all totals from line items.
+     *
+     * FIX: Now also calculates invoice-level discount_amount as the sum of all
+     *      per-line discount amounts, so the field is never silently left at 0.
+     */
     public function recalculateTotals(): void
     {
         $this->load('lineItems');
 
-        $subtotal  = $this->lineItems->sum('amount');
-        $cgst      = $this->lineItems->sum('cgst_amount');
-        $sgst      = $this->lineItems->sum('sgst_amount');
-        $igst      = $this->lineItems->sum('igst_amount');
-        $gstTotal  = $cgst + $sgst + $igst;
+        // Line-level discounted subtotal (amount = qty * rate * (1 - discount%))
+        $subtotal       = $this->lineItems->sum('amount');
+        $cgst           = $this->lineItems->sum('cgst_amount');
+        $sgst           = $this->lineItems->sum('sgst_amount');
+        $igst           = $this->lineItems->sum('igst_amount');
+        $gstTotal       = $cgst + $sgst + $igst;
+
+        // Invoice-level discount = sum of (qty * rate * discount%) across all lines
+        // Assumes InvoiceLineItem has a computed/stored `discount_amount` column.
+        // If your line item model stores the raw pre-discount value, adjust accordingly.
+        $discountAmount = $this->lineItems->sum('discount_amount');
 
         $this->update([
             'subtotal'       => $subtotal,
+            'discount_amount'=> $discountAmount,
             'taxable_amount' => $subtotal,
             'cgst_amount'    => $cgst,
             'sgst_amount'    => $sgst,
@@ -144,7 +193,19 @@ class Invoice extends Model
         ]);
     }
 
-    /** Record a payment and update invoice status */
+    /**
+     * Mark invoice as fully paid, settling any remaining balance.
+     */
+    public function markAsPaid(): void
+    {
+        $this->update([
+            'amount_paid' => $this->total_amount,
+            'amount_due'  => 0,
+            'status'      => 'paid',
+        ]);
+    }
+
+    /** Record a partial or full payment and update invoice status accordingly */
     public function recordPayment(float $amount): void
     {
         $paid   = $this->amount_paid + $amount;

@@ -3,7 +3,7 @@ import { Head, usePage, useForm } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import {
     Send, Sparkles, Paperclip, X, AlertCircle, Loader2, Copy, Check,
-    FileText, BarChart3, Users, Receipt, ShieldCheck, Zap,Package,Building
+    FileText, BarChart3, Users, Receipt, ShieldCheck, Zap, Package, Building, Download
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -116,16 +116,11 @@ export default function Chat() {
         "Give me 6 month report"
     ];
 
-    // Hard-coded list of functionalities for the right sidebar
     const botFeatures = [
-        // { icon: <FileText size={18} />, title: "Fetch & Generate Invoices", desc: "Instantly retrieve or draft new invoices." },
-        // { icon: <BarChart3 size={18} />, title: "Financial Reports", desc: "Get quick summaries of your income & expenses." },
         { icon: <Building size={18} />, title: "Business Details", desc: "View your company profile, update business information, and manage settings." },
         { icon: <Users size={18} />, title: "Client Management", desc: "Look up client details, create new clients, update clients and delete clients." },
         { icon: <Package size={18} />, title: "Inventory Management", desc: "Look up inventory items, add new products, update stock levels, and delete items." },
-        // { icon: <Receipt size={18} />, title: "Expense Tracking", desc: "Upload receipts to log and categorize expenses." },
-        // { icon: <ShieldCheck size={18} />, title: "Tax Compliance Check", desc: "Ensure your records meet standard tax rules." },
-        // { icon: <Zap size={18} />, title: "Data Extraction", desc: "Read and extract data from attached PDFs/Excel." },
+        { icon: <FileText size={18} />, title: "Invoice Management", desc: "Draft new invoices, preview PDFs, fetch existing records, and manage your billing." },
     ];
 
     return (
@@ -133,14 +128,12 @@ export default function Chat() {
             <Head title="Chat Assistant" />
 
             <div>
-                {/* Changed to max-w-6xl and added flex container for layout */}
                 <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
 
                     <div className="flex flex-col lg:flex-row gap-6 h-[80vh]">
 
                         {/* LEFT COLUMN: Chat Area */}
                         <div className="flex-1 bg-white overflow-hidden shadow-sm sm:rounded-2xl flex flex-col h-full border border-gray-100">
-                            {/* Header */}
                             <header className="p-4 border-b border-gray-100 flex items-center justify-between bg-white/80 backdrop-blur-md z-10 sticky top-0">
                                 <div className="flex items-center gap-3">
                                     <div className="relative">
@@ -159,7 +152,6 @@ export default function Chat() {
                                 </div>
                             </header>
 
-                            {/* Error Banner */}
                             {errors.ai && (
                                 <div className="bg-red-50 p-3 flex items-center gap-2 text-red-700 text-sm border-b border-red-100">
                                     <AlertCircle size={16} />
@@ -167,7 +159,6 @@ export default function Chat() {
                                 </div>
                             )}
 
-                            {/* Messages Area */}
                             <main className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-gray-50/50">
                                 <div className="flex justify-center">
                                     <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded-full uppercase tracking-widest">
@@ -218,6 +209,41 @@ export default function Chat() {
                                                             th: ({node, ...props}) => <th className="bg-gray-50 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200" {...props} />,
                                                             td: ({node, ...props}) => <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-700 border-b border-gray-200" {...props} />,
                                                             strong: ({node, ...props}) => <strong className="font-semibold text-gray-900" {...props} />,
+
+                                                            /* --- NEW: Custom Anchor (Link) Renderer --- */
+                                                            a: ({node, href, children, ...props}) => {
+                                                                // Extract text to check if it says "PDF"
+                                                                const textContent = Array.isArray(children) ? children.join('') : String(children);
+                                                                const isPdf = href?.toLowerCase().includes('.pdf') || textContent.toLowerCase().includes('pdf');
+
+                                                                if (isPdf) {
+                                                                    return (
+                                                                        <a
+                                                                            href={href}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="inline-flex items-center gap-2 px-4 py-2 my-2 bg-indigo-50 text-indigo-700 rounded-xl border border-indigo-100 hover:bg-indigo-100 hover:shadow-sm transition-all text-sm font-semibold no-underline w-fit"
+                                                                            {...props}
+                                                                        >
+                                                                            <Download size={16} className="text-indigo-500" />
+                                                                            <span>{children}</span>
+                                                                        </a>
+                                                                    );
+                                                                }
+
+                                                                // Standard Link Format
+                                                                return (
+                                                                    <a
+                                                                        href={href}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="text-[#5d51e8] hover:underline font-medium"
+                                                                        {...props}
+                                                                    >
+                                                                        {children}
+                                                                    </a>
+                                                                );
+                                                            }
                                                         }}
                                                     >
                                                         {msg.content}
@@ -239,10 +265,8 @@ export default function Chat() {
                                 <div ref={scrollRef} />
                             </main>
 
-                            {/* Footer / Input Area */}
                             <footer className="p-4 bg-white border-t border-gray-100">
 
-                                {/* File Attachment Previews */}
                                 {data.attachments.length > 0 && (
                                     <div className="flex flex-wrap gap-2 mb-3">
                                         {data.attachments.map((file, idx) => (
@@ -256,7 +280,6 @@ export default function Chat() {
                                     </div>
                                 )}
 
-                                {/* Suggested Prompts */}
                                 {!data.attachments.length && localMessages.length <= 1 && (
                                     <div className="flex gap-2 overflow-x-auto no-scrollbar pb-3">
                                         {suggestedPrompts.map((text) => (
@@ -274,7 +297,6 @@ export default function Chat() {
                                     </div>
                                 )}
 
-                                {/* Modern Input Form */}
                                 <form onSubmit={submit} className="relative flex items-end bg-gray-100 rounded-3xl border border-transparent focus-within:ring-2 focus-within:ring-[#5d51e8]/20 focus-within:bg-white focus-within:border-[#5d51e8]/30 transition-all shadow-sm">
 
                                     <div className="absolute left-4 bottom-3.5 text-[#5d51e8]/60 pointer-events-none">
@@ -345,7 +367,6 @@ export default function Chat() {
                                     <Sparkles size={18} className="text-[#5d51e8]" />
                                     What I can do
                                 </h2>
-
                             </div>
 
                             <div className="flex-1 overflow-y-auto p-3 space-y-2">
@@ -364,7 +385,6 @@ export default function Chat() {
                                     </div>
                                 ))}
                             </div>
-
                         </aside>
 
                     </div>

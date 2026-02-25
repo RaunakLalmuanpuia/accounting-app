@@ -28,7 +28,7 @@ class DatabaseSeeder extends Seeder
             ClientSeeder::class,
             InventoryItemSeeder::class,
             BankAccountSeeder::class,
-            InvoiceSeeder::class,
+//            InvoiceSeeder::class,
 //            BankTransactionSeeder::class,
         ]);
     }
