@@ -3,6 +3,7 @@
 namespace App\Ai\Tools\Client;
 
 use App\Models\User;
+use App\Services\ClientService;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
@@ -10,16 +11,22 @@ use Stringable;
 
 class UpdateClient implements Tool
 {
-    public function __construct(protected User $user) {}
+    protected ClientService $service;
+
+    public function __construct(protected User $user)
+    {
+        $this->service = new ClientService($user);
+    }
 
     public function description(): Stringable|string
     {
-        return 'Update details for an existing client. Provide the client_id and any fields to change. Only specified fields are updated.';
+        return 'Update one or more fields on an existing client. '
+            . 'Requires client_id; only the fields you pass are changed.';
     }
 
     public function handle(Request $request): Stringable|string
     {
-        $company = $this->user->companies()->first();
+        $company = $this->service->getCompany();
 
         if (! $company) {
             return json_encode(['success' => false, 'message' => 'No company profile found.']);
@@ -31,30 +38,7 @@ class UpdateClient implements Tool
             return json_encode(['success' => false, 'message' => 'Client not found.']);
         }
 
-        $updatable = [
-            'name', 'email', 'phone', 'gst_number', 'pan_number', 'gst_type',
-            'address', 'city', 'state', 'state_code', 'pincode', 'country',
-            'currency', 'payment_terms', 'credit_limit', 'notes', 'is_active',
-        ];
-
-        $updates = [];
-        foreach ($updatable as $field) {
-            if (isset($request[$field])) {
-                $updates[$field] = $request[$field];
-            }
-        }
-
-        if (empty($updates)) {
-            return json_encode(['success' => false, 'message' => 'No fields provided to update.']);
-        }
-
-        $client->update($updates);
-
-        return json_encode([
-            'success'        => true,
-            'message'        => "Client \"{$client->name}\" updated successfully.",
-            'updated_fields' => array_keys($updates),
-        ]);
+        return json_encode($this->service->update($client, $request->toArray()));
     }
 
     public function schema(JsonSchema $schema): array
@@ -66,7 +50,7 @@ class UpdateClient implements Tool
             'phone'         => $schema->string(),
             'gst_number'    => $schema->string(),
             'pan_number'    => $schema->string(),
-            'gst_type'      => $schema->string()->enum(['unregistered', 'regular', 'composition', 'consumer']),
+            'gst_type'      => $schema->string()->enum(['regular', 'composition', 'unregistered', 'sez', 'overseas']),
             'address'       => $schema->string(),
             'city'          => $schema->string(),
             'state'         => $schema->string(),
