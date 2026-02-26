@@ -17,46 +17,45 @@ class BankTransactionController extends Controller
     {
         $user = auth()->user();
 
-        // ✅ Get user's first company
-        $company = $user->companies()
-            ->orderBy('id')
-            ->first();
+        $company = $user->companies()->orderBy('id')->first();
 
+        // No company yet — render page with empty state
         if (!$company) {
-            abort(404, 'No company found for this user.');
+            return Inertia::render('Banking/PendingReviews', [
+                'transactions' => null,
+                'heads'        => [],
+                'bankAccounts' => [],
+            ]);
         }
 
-        // ✅ Get first bank account of that company
-        $bankAccountId = $company->bankAccounts()
-            ->orderBy('id')
-            ->value('id');
+        $bankAccounts = BankAccount::where('company_id', $company->id)->get();
 
-        if (!$bankAccountId) {
-            abort(404, 'No bank account found for this company.');
+        // No bank account yet — still render, just no transactions
+        $transactions = null;
+        $heads = [];
+
+        $bankAccountId = $company->bankAccounts()->orderBy('id')->value('id');
+
+        if ($bankAccountId) {
+            $transactions = BankTransaction::with(['narrationHead', 'narrationSubHead'])
+                ->where('bank_account_id', $bankAccountId)
+                ->where('is_duplicate', false)
+                ->whereIn('review_status', ['pending', 'reviewed'])
+                ->orderByDesc('transaction_date')
+                ->paginate(25);
+
+            $heads = NarrationHead::with('activeSubHeads')
+                ->forCompany($company->id)
+                ->active()
+                ->orderBy('sort_order')
+                ->get();
         }
-
-        $transactions = BankTransaction::with(['narrationHead', 'narrationSubHead'])
-            ->where('bank_account_id', $bankAccountId)
-            ->where('is_duplicate', false)
-            ->whereIn('review_status', ['pending', 'reviewed'])
-            ->orderByDesc('transaction_date')
-            ->paginate(25);
-
-
-        // Inside pending():
-        $bankAccounts = BankAccount::where('company_id', $company->id)->get(); // Adjust scope as needed
-
-
-        $heads = NarrationHead::with('activeSubHeads')
-            ->forCompany($company->id)   // 🔥 IMPORTANT LINE
-            ->active()
-            ->orderBy('sort_order')
-            ->get();
 
         return Inertia::render('Banking/PendingReviews', [
             'transactions' => $transactions,
             'heads'        => $heads,
             'bankAccounts' => $bankAccounts,
+            'hasCompany'   => $company !== null,
         ]);
     }
 }

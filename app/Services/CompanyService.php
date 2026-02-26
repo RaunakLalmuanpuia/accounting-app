@@ -21,7 +21,28 @@ class CompanyService
 
     public function createCompany(array $data): Company
     {
-        return $this->user->companies()->create($data);
+        // Separate bank account fields from company fields
+        $bankFields = ['bank_name', 'account_name', 'account_number', 'ifsc_code', 'branch', 'account_type', 'currency', 'opening_balance', 'opening_balance_date'];
+
+        $bankData = [];
+        foreach ($bankFields as $field) {
+            if (isset($data[$field])) {
+                $bankData[$field] = $data[$field];
+                unset($data[$field]);
+            }
+        }
+
+        $company = $this->user->companies()->create($data);
+
+        // If bank account details were provided, create a BankAccount record
+        if (!empty($bankData['account_number']) && !empty($bankData['bank_name'])) {
+            $bankData['is_primary'] = true;
+            $bankData['is_active']  = true;
+            $bankData['account_name'] = $bankData['account_name'] ?? $data['company_name'];
+            $company->bankAccounts()->create($bankData);
+        }
+
+        return $company;
     }
 
     public function updateCompany(Company $company, array $data): bool
@@ -74,6 +95,18 @@ class CompanyService
             'invoice_footer_note' => $company->invoice_footer_note,
             'is_active'           => $company->is_active,
             'created_at'          => $company->created_at?->toDateString(),
+            'bank_accounts'       => $company->bankAccounts->map(fn($b) => [
+                'id'              => $b->id,
+                'account_name'    => $b->account_name,
+                'bank_name'       => $b->bank_name,
+                'account_number'  => $b->account_number,
+                'ifsc_code'       => $b->ifsc_code,
+                'branch'          => $b->branch,
+                'account_type'    => $b->account_type,
+                'opening_balance' => $b->opening_balance,
+                'current_balance' => $b->current_balance,
+                'is_primary'      => $b->is_primary,
+            ])->toArray(),
         ];
     }
 }

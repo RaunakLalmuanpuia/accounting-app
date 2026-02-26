@@ -39,8 +39,15 @@ class UpdateNarrationHead implements Tool
             return json_encode(['success' => false, 'message' => "System heads cannot be modified."]);
         }
 
-        $data = (array) $request;
-        unset($data['head_id']);
+        $data = array_filter([
+            'name'        => $request['name'] ?? null,
+            'type'        => $request['type'] ?? null,
+            'description' => $request['description'] ?? null,
+            'color'       => $request['color'] ?? null,
+            'icon'        => $request['icon'] ?? null,
+            'sort_order'  => $request['sort_order'] ?? null,
+            'is_active'   => $request['is_active'] ?? null,
+        ], fn($v) => $v !== null);
 
         if (empty($data)) {
             return json_encode(['success' => false, 'message' => 'No fields provided to update.']);

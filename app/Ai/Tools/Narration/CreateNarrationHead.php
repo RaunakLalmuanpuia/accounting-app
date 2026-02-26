@@ -37,7 +37,18 @@ class CreateNarrationHead implements Tool
             return json_encode(['success' => false, 'message' => "Invalid type. Must be 'debit', 'credit', or 'both'."]);
         }
 
-        $head = $this->service->createHead((array) $request);
+        // ✅ Explicitly map — never cast Request to array directly
+        $data = [
+            'name'        => $request['name'],
+            'type'        => $request['type'],
+            'description' => $request['description'] ?? null,
+            'color'       => $request['color'] ?? null,
+            'icon'        => $request['icon'] ?? null,
+            'sort_order'  => $request['sort_order'] ?? 0,
+            'is_active'   => $request['is_active'] ?? true,
+        ];
+
+        $head = $this->service->createHead($data);
 
         return json_encode([
             'success' => true,
