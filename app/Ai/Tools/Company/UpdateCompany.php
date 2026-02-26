@@ -2,6 +2,7 @@
 
 namespace App\Ai\Tools\Company;
 
+use App\Services\CompanyService;
 use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Contracts\Tool;
@@ -10,7 +11,12 @@ use Stringable;
 
 class UpdateCompany implements Tool
 {
-    public function __construct(protected User $user) {}
+    protected CompanyService $service;
+
+    public function __construct(protected User $user)
+    {
+        $this->service = new CompanyService($user);
+    }
 
     public function description(): Stringable|string
     {
@@ -19,35 +25,25 @@ class UpdateCompany implements Tool
 
     public function handle(Request $request): Stringable|string
     {
-        $company = $this->user->companies()->first();
+        $company = $this->service->getCompany();
 
         if (! $company) {
             return json_encode([
                 'success' => false,
-                'message' => 'No company profile found. Please create one first.',
+                'message' => 'No company profile found. Please create one first using create_company.',
             ]);
         }
 
-        $updatable = [
-            'company_name', 'gst_number', 'pan_number',
-            'state', 'state_code', 'address', 'city', 'pincode', 'country',
-            'email', 'phone', 'website',
-            'bank_account_name', 'bank_account_number', 'bank_ifsc_code',
-            'bank_name', 'bank_branch', 'invoice_footer_note', 'is_active',
-        ];
-
-        $updates = [];
-        foreach ($updatable as $field) {
-            if (isset($request[$field])) {
-                $updates[$field] = $request[$field];
-            }
-        }
+        $updates = $this->service->extractUpdates((array) $request);
 
         if (empty($updates)) {
-            return json_encode(['success' => false, 'message' => 'No fields were provided to update.']);
+            return json_encode([
+                'success' => false,
+                'message' => 'No valid fields were provided to update.',
+            ]);
         }
 
-        $company->update($updates);
+        $this->service->updateCompany($company, $updates);
 
         return json_encode([
             'success'        => true,

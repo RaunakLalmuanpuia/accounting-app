@@ -2,17 +2,21 @@
 
 namespace App\Ai\Agents;
 
+use App\Ai\Tools\Company\CreateCompany;
 use App\Ai\Tools\Company\GetCompany;
 use App\Ai\Tools\Company\UpdateCompany;
+
 use App\Ai\Tools\Client\CreateClient;
 use App\Ai\Tools\Client\GetClientDetails;
 use App\Ai\Tools\Client\GetClients;
 use App\Ai\Tools\Client\UpdateClient;
 use App\Ai\Tools\Client\DeleteClient;
+
 use App\Ai\Tools\Inventory\CreateInventoryItem;
 use App\Ai\Tools\Inventory\DeleteInventoryItem;
 use App\Ai\Tools\Inventory\GetInventory;
 use App\Ai\Tools\Inventory\UpdateInventoryItem;
+
 use App\Ai\Tools\Invoice\CreateInvoiceDraft;
 use App\Ai\Tools\Invoice\ConfirmInvoice;
 use App\Ai\Tools\Invoice\GetInvoices;
@@ -20,6 +24,15 @@ use App\Ai\Tools\Invoice\GetInvoiceDetails;
 use App\Ai\Tools\Invoice\UpdateInvoice;
 use App\Ai\Tools\Invoice\DeleteInvoice;
 use App\Ai\Tools\Invoice\GenerateInvoicePdf;
+
+use App\Ai\Tools\Narration\CreateNarrationHead;
+use App\Ai\Tools\Narration\DeleteNarrationHead;
+use App\Ai\Tools\Narration\GetNarrationHeads;
+use App\Ai\Tools\Narration\UpdateNarrationHead;
+use App\Ai\Tools\Narration\CreateNarrationSubHead;
+use App\Ai\Tools\Narration\DeleteNarrationSubHead;
+use App\Ai\Tools\Narration\GetNarrationSubHeads;
+use App\Ai\Tools\Narration\UpdateNarrationSubHead;
 
 use App\Models\User;
 use Laravel\Ai\Attributes\MaxSteps;
@@ -59,6 +72,7 @@ class AccountingAssistant implements Agent, Conversational, HasTools
 
         **Company Profile**
         - View and update the company's business profile (name, GST, PAN, address, bank details)
+        - Create a company profile if the user does not already have one (one company per user — creation is blocked if one exists)
 
         **Clients**
         - List clients, search by name/city/email, view detailed profiles with outstanding balances
@@ -75,6 +89,19 @@ class AccountingAssistant implements Agent, Conversational, HasTools
         - Update invoice metadata and record payments
         - Cancel/delete invoices (guards against invoices with payments)
         - Generate downloadable PDF invoices
+
+        **Narration Heads & Sub-Heads**
+        - View all narration heads (transaction categories) — company-specific
+        - Create, update, and delete custom narration heads (system heads are read-only)
+        - View, create, update, and delete sub-heads under any narration head
+        - Heads have a type: debit, credit, or both
+        - Sub-heads can optionally require a reference number or party name
+        - When listing heads, call get_narration_heads with NO arguments unless the user explicitly asks to filter by type
+        - CRITICAL: When creating, updating, or deleting a sub-head, you MUST know the exact parent Narration Head ID and the Sub-Head ID.
+          1. If you do not have the IDs, call get_narration_heads to find them based on the names the user provided.
+          2. If the user asks to update or delete a sub-head but doesn't mention which parent head it belongs to, you MUST stop and ask them.
+          3. NEVER confuse a ledger_code or sort_order with a database ID. Tools like update_narration_sub_head and delete_narration_sub_head require the actual database 'id' of the sub-head.
+          4. If you find multiple heads with the exact same name but different types, you MUST stop and ask the user whether they mean the debit or credit head.
 
         ## Invoice Creation Workflow (MANDATORY — always follow this order)
 
@@ -123,8 +150,12 @@ class AccountingAssistant implements Agent, Conversational, HasTools
 
         ## Behaviour Guidelines
 
-        - **Always confirm** before destructive or financial actions (deleting, recording payments, confirming invoices).
+        - **Always confirm** before destructive or financial actions (deleting heads/sub-heads,
+          recording payments, confirming invoices).
         - **Never expose raw database IDs** — refer to entities by name or invoice number.
+          (Exception: head_id and sub_head_id are required by tools — retrieve them via
+          get_narration_heads / get_narration_sub_heads and pass them internally; never
+          ask the user to supply raw IDs.)
         - Present monetary values in **Indian Rupees (₹)** with two decimal places.
         - Use **tables or bullet points** when presenting lists or invoice summaries.
         - If information is missing, **ask for it** — never guess or copy from a prior invoice.
@@ -132,6 +163,8 @@ class AccountingAssistant implements Agent, Conversational, HasTools
         - When recording a payment, confirm the amount and invoice number before proceeding.
         - To get a PDF download link, always call generate_invoice_pdf — never attempt to
           construct a URL yourself.
+        - System heads and sub-heads (is_system = true) are read-only — inform the user if
+          they try to edit or delete them.
 
         PROMPT;
     }
@@ -142,6 +175,7 @@ class AccountingAssistant implements Agent, Conversational, HasTools
 
             // -- Company --------------------------------------------------
             new GetCompany($this->user),
+            new CreateCompany($this->user),
             new UpdateCompany($this->user),
 
             // -- Clients --------------------------------------------------
@@ -165,6 +199,18 @@ class AccountingAssistant implements Agent, Conversational, HasTools
             new UpdateInvoice($this->user),
             new DeleteInvoice($this->user),
             new GenerateInvoicePdf($this->user),
+
+            // -- Narration Heads ------------------------------------------
+            new GetNarrationHeads($this->user),
+            new CreateNarrationHead($this->user),
+            new UpdateNarrationHead($this->user),
+            new DeleteNarrationHead($this->user),
+
+            // -- Narration Sub-Heads --------------------------------------
+            new GetNarrationSubHeads($this->user),
+            new CreateNarrationSubHead($this->user),
+            new UpdateNarrationSubHead($this->user),
+            new DeleteNarrationSubHead($this->user),
 
         ];
     }
