@@ -21,15 +21,15 @@ function NoCompanyState() {
             <div className="w-16 h-16 bg-amber-50 border-2 border-amber-200 rounded-2xl flex items-center justify-center mb-5">
                 <Building2 className="text-amber-500" size={28} />
             </div>
-            <h2 className="text-xl font-bold text-gray-800 mb-2">No Company Profile Found</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-2">No Business Profile Found</h2>
             <p className="text-gray-500 text-sm max-w-xs mb-6 leading-relaxed">
-                You need to set up your company profile before you can manage banking transactions.
+                You need to set up your business profile before you can manage banking transactions.
             </p>
             <Link
                 href={route('accounting.chat')}
                 className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm"
             >
-                Set Up Company
+                Set Up Business
                 <ArrowRight size={15} />
             </Link>
         </div>
@@ -196,19 +196,19 @@ export default function PendingReviews({ auth, transactions, heads, bankAccounts
                                 </div>
 
                                 {/* Bank Account Selector */}
-                                {bankAccounts.length > 1 && (
-                                    <select
-                                        value={smsForm.data.bank_account_id}
-                                        onChange={(e) => smsForm.setData('bank_account_id', e.target.value)}
-                                        className="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 mb-3"
-                                    >
-                                        {bankAccounts.map(acc => (
-                                            <option key={acc.id} value={acc.id}>
-                                                {acc.bank_name} — ···{acc.account_number.slice(-4)}
-                                            </option>
-                                        ))}
-                                    </select>
-                                )}
+                                {/*{bankAccounts.length > 1 && (*/}
+                                {/*    <select*/}
+                                {/*        value={smsForm.data.bank_account_id}*/}
+                                {/*        onChange={(e) => smsForm.setData('bank_account_id', e.target.value)}*/}
+                                {/*        className="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 mb-3"*/}
+                                {/*    >*/}
+                                {/*        {bankAccounts.map(acc => (*/}
+                                {/*            <option key={acc.id} value={acc.id}>*/}
+                                {/*                {acc.bank_name} — ···{acc.account_number.slice(-4)}*/}
+                                {/*            </option>*/}
+                                {/*        ))}*/}
+                                {/*    </select>*/}
+                                {/*)}*/}
 
                                 <form onSubmit={handleSmsSubmit} className="space-y-3">
                                     <textarea
@@ -239,19 +239,19 @@ export default function PendingReviews({ auth, transactions, heads, bankAccounts
                                 </div>
 
                                 {/* Bank Account Selector */}
-                                {bankAccounts.length > 1 && (
-                                    <select
-                                        value={statementForm.data.bank_account_id}
-                                        onChange={(e) => statementForm.setData('bank_account_id', e.target.value)}
-                                        className="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 mb-3"
-                                    >
-                                        {bankAccounts.map(acc => (
-                                            <option key={acc.id} value={acc.id}>
-                                                {acc.bank_name} — ···{acc.account_number.slice(-4)}
-                                            </option>
-                                        ))}
-                                    </select>
-                                )}
+                                {/*{bankAccounts.length > 1 && (*/}
+                                {/*    <select*/}
+                                {/*        value={statementForm.data.bank_account_id}*/}
+                                {/*        onChange={(e) => statementForm.setData('bank_account_id', e.target.value)}*/}
+                                {/*        className="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 mb-3"*/}
+                                {/*    >*/}
+                                {/*        {bankAccounts.map(acc => (*/}
+                                {/*            <option key={acc.id} value={acc.id}>*/}
+                                {/*                {acc.bank_name} — ···{acc.account_number.slice(-4)}*/}
+                                {/*            </option>*/}
+                                {/*        ))}*/}
+                                {/*    </select>*/}
+                                {/*)}*/}
 
                                 <form onSubmit={handleStatementSubmit} className="space-y-3">
                                     <div className="relative">

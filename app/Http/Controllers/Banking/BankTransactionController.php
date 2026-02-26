@@ -25,8 +25,10 @@ class BankTransactionController extends Controller
                 'transactions' => null,
                 'heads'        => [],
                 'bankAccounts' => [],
+                'hasCompany'   => false,
             ]);
         }
+
 
         $bankAccounts = BankAccount::where('company_id', $company->id)->get();
 
