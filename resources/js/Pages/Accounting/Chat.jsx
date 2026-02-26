@@ -117,7 +117,7 @@ export default function Chat() {
     ];
 
     const botFeatures = [
-        { icon: <Building size={18} />, title: "Business Details", desc: "View your company profile, update business information, and manage settings." },
+        { icon: <Building size={18} />, title: "Business Details", desc: "Create and View your company profile, and manage Narration Head and Sub Head." },
         { icon: <Users size={18} />, title: "Client Management", desc: "Look up client details, create new clients, update clients and delete clients." },
         { icon: <Package size={18} />, title: "Inventory Management", desc: "Look up inventory items, add new products, update stock levels, and delete items." },
         { icon: <FileText size={18} />, title: "Invoice Management", desc: "Draft new invoices, preview PDFs, fetch existing records, and manage your billing." },
