@@ -1,5 +1,5 @@
 import React from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import {
     Sparkles,
     MessageSquare,
@@ -12,6 +12,9 @@ import {
 } from 'lucide-react';
 
 export default function Landing() {
+    const { auth } = usePage().props;
+
+    const isLoggedIn = !!auth?.user;
     return (
         <>
             <Head title="AI Accounting Platform" />
@@ -28,18 +31,30 @@ export default function Landing() {
                     </div>
 
                     <div className="flex gap-4">
-                        <Link
-                            href="/login"
-                            className="border border-gray-200 px-6 py-3 rounded-2xl font-semibold hover:bg-gray-50 transition"
-                        >
-                            Login
-                        </Link>
-                        <Link
-                            href="/register"
-                            className="bg-[#5d51e8] hover:bg-[#4a3fc4] text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition shadow-sm"
-                        >
-                            Get Started
-                        </Link>
+                        {!isLoggedIn ? (
+                            <>
+                                <Link
+                                    href="/login"
+                                    className="border border-gray-200 px-6 py-3 rounded-2xl font-semibold hover:bg-gray-50 transition"
+                                >
+                                    Login
+                                </Link>
+
+                                <Link
+                                    href="/register"
+                                    className="bg-[#5d51e8] hover:bg-[#4a3fc4] text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition shadow-sm"
+                                >
+                                    Get Started
+                                </Link>
+                            </>
+                        ) : (
+                            <Link
+                                href="/dashboard"
+                                className="bg-[#5d51e8] hover:bg-[#4a3fc4] text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition shadow-sm"
+                            >
+                                Go to Dashboard
+                            </Link>
+                        )}
                     </div>
                 </header>
 

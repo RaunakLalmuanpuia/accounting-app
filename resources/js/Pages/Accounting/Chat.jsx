@@ -117,58 +117,59 @@ export default function Chat() {
     ];
 
     const botFeatures = [
-        { icon: <Building size={18} />, title: "Business Details", desc: "Create and View your company profile, and manage Narration Head and Sub Head." },
-        { icon: <Users size={18} />, title: "Client Management", desc: "Look up client details, create new clients, update clients and delete clients." },
-        { icon: <Package size={18} />, title: "Inventory Management", desc: "Look up inventory items, add new products, update stock levels, and delete items." },
-        { icon: <FileText size={18} />, title: "Invoice Management", desc: "Draft new invoices, preview PDFs, fetch existing records, and manage your billing." },
+        { icon: <Building size={18} />, title: "Business Details", desc: "Manage profile, heads & subheads." },
+        { icon: <Users size={18} />, title: "Clients", desc: "CRUD operations for client data." },
+        { icon: <Package size={18} />, title: "Inventory", desc: "Track stock and add products." },
+        { icon: <FileText size={18} />, title: "Invoices", desc: "Draft, fetch, and preview PDFs." },
     ];
 
     return (
         <AuthenticatedLayout>
             <Head title="Chat Assistant" />
 
-            <div>
-                <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <div className="bg-gray-50/50 min-h-[calc(100vh-64px)]">
+                <div className="max-w-7xl mx-auto p-2 sm:p-6 lg:p-8">
 
-                    <div className="flex flex-col lg:flex-row gap-6 h-[80vh]">
+                    {/* Main Container: Full height calc to fit screen */}
+                    <div className="flex flex-col lg:flex-row gap-4 h-[calc(100vh-100px)] lg:h-[80vh]">
 
-                        {/* LEFT COLUMN: Chat Area */}
-                        <div className="flex-1 bg-white overflow-hidden shadow-sm sm:rounded-2xl flex flex-col h-full border border-gray-100">
-                            <header className="p-4 border-b border-gray-100 flex items-center justify-between bg-white/80 backdrop-blur-md z-10 sticky top-0">
+                        {/* LEFT COLUMN: Chat Area - Forced to grow */}
+                        <div className="flex-[3] bg-white overflow-hidden shadow-sm rounded-2xl flex flex-col min-h-0 border border-gray-100 order-1 lg:order-1">
+                            <header className="p-3 sm:p-4 border-b border-gray-100 flex items-center justify-between bg-white/80 backdrop-blur-md z-10 sticky top-0">
                                 <div className="flex items-center gap-3">
                                     <div className="relative">
-                                        <div className="w-10 h-10 bg-gradient-to-br from-[#5d51e8] to-[#8e84f3] rounded-full flex items-center justify-center text-white font-bold text-sm tracking-wide shadow-sm">
+                                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-[#5d51e8] to-[#8e84f3] rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm shadow-sm">
                                             AI
                                         </div>
-                                        <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+                                        <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></span>
                                     </div>
                                     <div>
-                                        <h1 className="font-bold text-gray-900 text-[15px]">Accounting Assistant</h1>
+                                        <h1 className="font-bold text-gray-900 text-sm sm:text-[15px]">Accounting Assistant</h1>
                                         <div className="flex items-center gap-1">
-                                            <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                                            <span className="text-xs text-gray-500 font-medium">Online</span>
+                                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                                            <span className="text-[10px] sm:text-xs text-gray-500 font-medium">Online</span>
                                         </div>
                                     </div>
                                 </div>
                             </header>
 
                             {errors.ai && (
-                                <div className="bg-red-50 p-3 flex items-center gap-2 text-red-700 text-sm border-b border-red-100">
+                                <div className="bg-red-50 p-3 flex items-center gap-2 text-red-700 text-xs sm:text-sm border-b border-red-100">
                                     <AlertCircle size={16} />
                                     <span>{errors.ai}</span>
                                 </div>
                             )}
 
-                            <main className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-gray-50/50">
+                            <main className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-4 sm:space-y-6 bg-gray-50/50">
                                 <div className="flex justify-center">
-                                    <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded-full uppercase tracking-widest">
+                                    <span className="text-[9px] sm:text-[10px] font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded-full uppercase tracking-widest">
                                         Today
                                     </span>
                                 </div>
 
                                 {localMessages.map((msg) => (
                                     <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                        <div className={`relative max-w-[85%] px-5 py-3.5 rounded-2xl text-[15px] leading-relaxed shadow-sm group ${
+                                        <div className={`relative max-w-[92%] sm:max-w-[85%] px-4 py-2.5 sm:px-5 sm:py-3.5 rounded-2xl text-[14px] sm:text-[15px] leading-relaxed shadow-sm group ${
                                             msg.role === 'user'
                                                 ? 'bg-[#5d51e8] text-white rounded-br-sm'
                                                 : 'bg-white border border-gray-100 text-gray-800 rounded-bl-sm'
@@ -177,104 +178,68 @@ export default function Chat() {
                                             {msg.role === 'assistant' && (
                                                 <button
                                                     onClick={() => handleCopy(msg.content, msg.id)}
-                                                    className="absolute top-2 right-2 p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    title="Copy to clipboard"
+                                                    className="absolute top-2 right-2 p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md lg:opacity-0 lg:group-hover:opacity-100 transition-opacity"
                                                 >
-                                                    {copiedId === msg.id ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+                                                    {copiedId === msg.id ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
                                                 </button>
                                             )}
 
                                             {msg.attachmentCount > 0 && (
-                                                <div className="flex items-center gap-1 text-xs opacity-75 mb-2 pb-2 border-b border-white/20">
+                                                <div className="flex items-center gap-1 text-[10px] sm:text-xs opacity-75 mb-2 pb-2 border-b border-white/20">
                                                     <Paperclip size={12} /> {msg.attachmentCount} file(s) attached
                                                 </div>
                                             )}
 
-                                            {msg.role === 'user' ? (
-                                                <div className="whitespace-pre-wrap break-words">{msg.content}</div>
-                                            ) : (
-                                                <div className="markdown-body pr-6 break-words">
-                                                    <ReactMarkdown
-                                                        remarkPlugins={[remarkGfm]}
-                                                        components={{
-                                                            p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />,
-                                                            ul: ({node, ...props}) => <ul className="list-disc ml-5 mb-2" {...props} />,
-                                                            ol: ({node, ...props}) => <ol className="list-decimal ml-5 mb-2" {...props} />,
-                                                            li: ({node, ...props}) => <li className="mb-1" {...props} />,
-                                                            table: ({node, ...props}) => (
-                                                                <div className="overflow-x-auto my-3">
-                                                                    <table className="min-w-full divide-y divide-gray-200 border border-gray-200 text-sm" {...props} />
-                                                                </div>
-                                                            ),
-                                                            th: ({node, ...props}) => <th className="bg-gray-50 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200" {...props} />,
-                                                            td: ({node, ...props}) => <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-700 border-b border-gray-200" {...props} />,
-                                                            strong: ({node, ...props}) => <strong className="font-semibold text-gray-900" {...props} />,
-
-                                                            /* --- NEW: Custom Anchor (Link) Renderer --- */
-                                                            a: ({node, href, children, ...props}) => {
-                                                                // Extract text to check if it says "PDF"
-                                                                const textContent = Array.isArray(children) ? children.join('') : String(children);
-                                                                const isPdf = href?.toLowerCase().includes('.pdf') || textContent.toLowerCase().includes('pdf');
-
-                                                                if (isPdf) {
-                                                                    return (
-                                                                        <a
-                                                                            href={href}
-                                                                            target="_blank"
-                                                                            rel="noopener noreferrer"
-                                                                            className="inline-flex items-center gap-2 px-4 py-2 my-2 bg-indigo-50 text-indigo-700 rounded-xl border border-indigo-100 hover:bg-indigo-100 hover:shadow-sm transition-all text-sm font-semibold no-underline w-fit"
-                                                                            {...props}
-                                                                        >
-                                                                            <Download size={16} className="text-indigo-500" />
-                                                                            <span>{children}</span>
-                                                                        </a>
-                                                                    );
-                                                                }
-
-                                                                // Standard Link Format
+                                            <div className="markdown-body pr-4 sm:pr-6 break-words">
+                                                <ReactMarkdown
+                                                    remarkPlugins={[remarkGfm]}
+                                                    components={{
+                                                        p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />,
+                                                        table: ({node, ...props}) => (
+                                                            <div className="overflow-x-auto my-3">
+                                                                <table className="min-w-full divide-y divide-gray-200 border border-gray-200 text-xs sm:text-sm" {...props} />
+                                                            </div>
+                                                        ),
+                                                        a: ({node, href, children, ...props}) => {
+                                                            const textContent = Array.isArray(children) ? children.join('') : String(children);
+                                                            const isPdf = href?.toLowerCase().includes('.pdf') || textContent.toLowerCase().includes('pdf');
+                                                            if (isPdf) {
                                                                 return (
-                                                                    <a
-                                                                        href={href}
-                                                                        target="_blank"
-                                                                        rel="noopener noreferrer"
-                                                                        className="text-[#5d51e8] hover:underline font-medium"
-                                                                        {...props}
-                                                                    >
-                                                                        {children}
+                                                                    <a href={href} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-3 py-1.5 my-2 bg-indigo-50 text-indigo-700 rounded-xl border border-indigo-100 text-xs sm:text-sm font-semibold no-underline" {...props}>
+                                                                        <Download size={14} /> <span>{children}</span>
                                                                     </a>
                                                                 );
                                                             }
-                                                        }}
-                                                    >
-                                                        {msg.content}
-                                                    </ReactMarkdown>
-                                                </div>
-                                            )}
+                                                            return <a href={href} target="_blank" rel="noopener noreferrer" className="text-[#5d51e8] hover:underline font-medium" {...props}>{children}</a>;
+                                                        }
+                                                    }}
+                                                >
+                                                    {msg.content}
+                                                </ReactMarkdown>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
 
                                 {processing && (
                                     <div className="flex justify-start">
-                                        <div className="bg-white border border-gray-100 text-gray-500 px-5 py-3.5 rounded-2xl rounded-bl-sm flex items-center gap-2 shadow-sm">
+                                        <div className="bg-white border border-gray-100 text-gray-500 px-4 py-2.5 sm:px-5 sm:py-3.5 rounded-2xl rounded-bl-sm flex items-center gap-2 shadow-sm">
                                             <Loader2 size={16} className="animate-spin text-[#5d51e8]" />
-                                            <span className="text-sm">Thinking...</span>
+                                            <span className="text-xs sm:text-sm">Thinking...</span>
                                         </div>
                                     </div>
                                 )}
                                 <div ref={scrollRef} />
                             </main>
 
-                            <footer className="p-4 bg-white border-t border-gray-100">
-
+                            {/* Input Footer */}
+                            <footer className="p-3 sm:p-4 bg-white border-t border-gray-100">
                                 {data.attachments.length > 0 && (
                                     <div className="flex flex-wrap gap-2 mb-3">
                                         {data.attachments.map((file, idx) => (
-                                            <div key={idx} className="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-indigo-100">
-                                                <span className="truncate max-w-[120px]">{file.name}</span>
-                                                <button type="button" onClick={() => removeAttachment(idx)} className="hover:text-red-500">
-                                                    <X size={14} />
-                                                </button>
+                                            <div key={idx} className="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-2 py-1 rounded-lg text-[10px] font-medium border border-indigo-100">
+                                                <span className="truncate max-w-[100px]">{file.name}</span>
+                                                <button type="button" onClick={() => removeAttachment(idx)} className="hover:text-red-500"><X size={12} /></button>
                                             </div>
                                         ))}
                                     </div>
@@ -283,104 +248,55 @@ export default function Chat() {
                                 {!data.attachments.length && localMessages.length <= 1 && (
                                     <div className="flex gap-2 overflow-x-auto no-scrollbar pb-3">
                                         {suggestedPrompts.map((text) => (
-                                            <button
-                                                key={text}
-                                                onClick={() => {
-                                                    setData('message', text);
-                                                    setTimeout(() => submit(), 50);
-                                                }}
-                                                className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors whitespace-nowrap"
-                                            >
+                                            <button key={text} onClick={() => { setData('message', text); setTimeout(() => submit(), 50); }}
+                                                    className="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-medium text-gray-600 hover:bg-gray-50 whitespace-nowrap">
                                                 {text}
                                             </button>
                                         ))}
                                     </div>
                                 )}
 
-                                <form onSubmit={submit} className="relative flex items-end bg-gray-100 rounded-3xl border border-transparent focus-within:ring-2 focus-within:ring-[#5d51e8]/20 focus-within:bg-white focus-within:border-[#5d51e8]/30 transition-all shadow-sm">
-
-                                    <div className="absolute left-4 bottom-3.5 text-[#5d51e8]/60 pointer-events-none">
-                                        <Sparkles size={20} />
+                                <form onSubmit={submit} className="relative flex items-end bg-gray-100 rounded-2xl sm:rounded-3xl border border-transparent focus-within:bg-white focus-within:ring-2 focus-within:ring-[#5d51e8]/20 transition-all">
+                                    <div className="absolute left-3 bottom-3 text-[#5d51e8]/60 pointer-events-none">
+                                        <Sparkles size={18} />
                                     </div>
-
                                     <textarea
                                         ref={textareaRef}
                                         rows={1}
-                                        placeholder="Message Accounting Assistant..."
+                                        placeholder="Message AI..."
                                         value={data.message}
                                         onChange={handleInput}
                                         onKeyDown={handleKeyDown}
                                         disabled={processing}
-                                        className={`w-full pl-12 pr-24 py-3.5 bg-transparent border-none focus:ring-0 resize-none text-gray-800 placeholder-gray-500 m-0 ${errors.message ? 'border-red-300 ring-red-200 focus:ring-red-200' : ''}`}
-                                        style={{
-                                            minHeight: '52px',
-                                            maxHeight: '200px'
-                                        }}
+                                        className="w-full pl-10 pr-16 sm:pr-24 py-3 bg-transparent border-none focus:ring-0 resize-none text-sm sm:text-base text-gray-800 m-0"
+                                        style={{ minHeight: '44px', maxHeight: '120px' }}
                                     />
-
-                                    <input
-                                        type="file"
-                                        multiple
-                                        ref={fileInputRef}
-                                        onChange={handleFileChange}
-                                        className="hidden"
-                                        accept=".pdf,.csv,.xlsx,.xls,.docx,.doc,.txt,.png,.jpg,.jpeg,.webp"
-                                    />
-
-                                    <div className="absolute right-2 bottom-2 flex items-center gap-1">
-                                        <button
-                                            type="button"
-                                            onClick={() => fileInputRef.current?.click()}
-                                            className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-xl transition-colors"
-                                            title="Attach files (Max 5)"
-                                        >
-                                            <Paperclip size={18} />
-                                        </button>
-
-                                        <button
-                                            type="submit"
-                                            disabled={processing || (!data.message.trim() && data.attachments.length === 0)}
-                                            className="p-2 bg-[#5d51e8] text-white rounded-xl hover:bg-[#4a3fc4] transition-colors disabled:opacity-50 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
-                                        >
-                                            <Send size={18} className={data.message.trim() || data.attachments.length > 0 ? "translate-x-0.5" : ""} />
-                                        </button>
+                                    <div className="absolute right-1.5 bottom-1.5 flex items-center gap-0.5 sm:gap-1">
+                                        <button type="button" onClick={() => fileInputRef.current?.click()} className="p-2 text-gray-400 hover:bg-gray-200 rounded-lg"><Paperclip size={18} /></button>
+                                        <button type="submit" disabled={processing || (!data.message.trim() && data.attachments.length === 0)} className="p-2 bg-[#5d51e8] text-white rounded-lg disabled:opacity-50"><Send size={18} /></button>
                                     </div>
                                 </form>
-
-                                <div className="flex justify-between items-center px-2">
-                                    {errors.message ? (
-                                        <p className="text-red-500 text-xs mt-2">{errors.message}</p>
-                                    ) : (
-                                        <p className="text-gray-400 text-[10px] mt-2 text-center w-full">
-                                            AI can make mistakes. Check important info.
-                                        </p>
-                                    )}
-                                </div>
-
+                                <p className="text-gray-400 text-[9px] mt-2 text-center w-full">AI can make mistakes. Check important info.</p>
                             </footer>
                         </div>
 
-                        {/* RIGHT COLUMN: Chat Functionalities Sidebar */}
-                        <aside className="w-full lg:w-[320px] flex-shrink-0 bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-gray-100 flex flex-col h-full">
-                            <div className="p-5 border-b border-gray-100 bg-gray-50/50">
-                                <h2 className="font-bold text-gray-900 flex items-center gap-2">
-                                    <Sparkles size={18} className="text-[#5d51e8]" />
+                        {/* RIGHT COLUMN: Smaller sidebar on mobile */}
+                        <aside className="w-full lg:w-[280px] flex-shrink-0 bg-white overflow-hidden shadow-sm rounded-xl sm:rounded-2xl border border-gray-100 flex flex-col order-2 lg:order-2 max-h-[160px] lg:max-h-full">
+                            <div className="p-3 border-b border-gray-100 bg-gray-50/50">
+                                <h2 className="font-bold text-gray-900 flex items-center gap-2 text-xs sm:text-sm uppercase tracking-wider">
+                                    <Sparkles size={14} className="text-[#5d51e8]" />
                                     What I can do
                                 </h2>
                             </div>
-
-                            <div className="flex-1 overflow-y-auto p-3 space-y-2">
+                            <div className="flex-1 overflow-y-auto p-2 lg:p-3 space-y-1 sm:space-y-2">
                                 {botFeatures.map((feature, idx) => (
-                                    <div
-                                        key={idx}
-                                        className="flex gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100 cursor-default"
-                                    >
-                                        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                                            {feature.icon}
+                                    <div key={idx} className="flex gap-3 p-2 rounded-lg lg:rounded-xl hover:bg-gray-50 border border-transparent lg:hover:border-gray-100">
+                                        <div className="flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                            {React.cloneElement(feature.icon, { size: 14 })}
                                         </div>
-                                        <div>
-                                            <h3 className="text-sm font-semibold text-gray-800">{feature.title}</h3>
-                                            <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{feature.desc}</p>
+                                        <div className="min-w-0">
+                                            <h3 className="text-[11px] sm:text-xs font-semibold text-gray-800 truncate">{feature.title}</h3>
+                                            <p className="text-[10px] text-gray-400 mt-0.5 leading-tight lg:leading-relaxed truncate lg:whitespace-normal">{feature.desc}</p>
                                         </div>
                                     </div>
                                 ))}
@@ -390,6 +306,7 @@ export default function Chat() {
                     </div>
                 </div>
             </div>
+            <input type="file" multiple ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf,.csv,.xlsx,.xls,.docx,.doc,.txt,.png,.jpg,.jpeg,.webp" />
         </AuthenticatedLayout>
     );
 }

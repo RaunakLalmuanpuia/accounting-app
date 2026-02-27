@@ -144,7 +144,19 @@ export default function AuthenticatedLayout({ header, children }) {
                             href={route('dashboard')}
                             active={route().current('dashboard')}
                         >
-                            Dashboard
+                            Docs
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href={route('accounting.chat')}
+                            active={route().current('accounting.chat')}
+                        >
+                            Chat
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href={route('banking.transactions.pending')}
+                            active={route().current('banking.transactions.pending')}
+                        >
+                            Narration
                         </ResponsiveNavLink>
                     </div>
 
