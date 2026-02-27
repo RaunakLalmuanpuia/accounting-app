@@ -117,12 +117,11 @@ export default function Chat() {
     ];
 
     const botFeatures = [
-        { icon: <Building size={18} />, title: "Business Details", desc: "Manage profile, heads & subheads." },
-        { icon: <Users size={18} />, title: "Clients", desc: "CRUD operations for client data." },
-        { icon: <Package size={18} />, title: "Inventory", desc: "Track stock and add products." },
-        { icon: <FileText size={18} />, title: "Invoices", desc: "Draft, fetch, and preview PDFs." },
+        { icon: <Building size={18} />, title: "Business Details", desc: "Create and View your company profile, and manage Narration Head and Sub Head." },
+        { icon: <Users size={18} />, title: "Client Management", desc: "Look up client details, create new clients, update clients and delete clients." },
+        { icon: <Package size={18} />, title: "Inventory Management", desc: "Look up inventory items, add new products, update stock levels, and delete items." },
+        { icon: <FileText size={18} />, title: "Invoice Management", desc: "Draft new invoices, preview PDFs, fetch existing records, and manage your billing." },
     ];
-
     return (
         <AuthenticatedLayout>
             <Head title="Chat Assistant" />

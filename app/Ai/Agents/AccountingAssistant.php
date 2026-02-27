@@ -50,9 +50,9 @@ use Stringable;
 
 #[Provider(Lab::OpenAI)]
 #[Model('gpt-4o')]
-#[MaxSteps(15)]
-#[MaxTokens(4096)]
-#[Temperature(0.3)]
+#[MaxSteps(30)]
+#[MaxTokens(5000)]
+#[Temperature(0.15)]
 class AccountingAssistant implements Agent, Conversational, HasTools
 {
     use Promptable, RemembersConversations;
